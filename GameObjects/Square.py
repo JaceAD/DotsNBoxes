@@ -6,8 +6,15 @@ Created on Wed Feb  7 15:04:19 2018
 """
 import pygame
 
+BLACK    = (   0,   0,   0)
+WHITE    = ( 255, 255, 255)
+GREEN    = (   0, 255,   0)
+RED      = ( 255,   0,   0)
+BLUE     = (   0,   0, 255)
+GRAY     = ( 127, 127, 127)
+
 class Square:
-    def __init__(self, x, y):
+    def __init__(self, x, y, surface):
         self.top = False
         self.bottom = False
         self.left = False
@@ -15,7 +22,8 @@ class Square:
         self.owner = "unOwned"
         self.x = x
         self.y = y
-    
+        self.surface = surface
+        
     def getLeft(self):
         return self.left
     def getRight(self):
@@ -44,32 +52,47 @@ class Square:
         self.owner = newOwner
     
     def drawLeft(self, color):
-        #implement here
+        startX = self.getX
+        startY = self.getY
+        pygame.draw.Line(self.surface, color, (startX, startY), (startX, startY + 100), 10)
       
     def drawRight(self, color):
+        startX = self.getX + 100
+        startY = self.getY
+        pygame.draw.Line(self.surface, color, (startX, startY), (startX, startY + 100), 10)
         #implement here
           
     def drawTop(self, color):
+        startX = self.getX
+        startY = self.getY
+        pygame.draw.Line(self.surface, color, (startX, startY), (startX + 100, startY), 10)
         #implement here
       
     def drawBottom(self, color):
+        startX = self.getX
+        startY = self.getY + 100
+        pygame.draw.Line(self.surface, color, (startX, startY), (startX + 100, startY), 10)
         #implement here
         
     def draw(self):
         fillBox = 0
         if(getLeft):
-            self.drawLeft()
+            self.drawLeft(BLACK)
             fillBox +=1
         if(getRight):
-            self.drawRight()
+            self.drawRight(BLACK)
             fillBox +=1
         if(getTop):
-            self.drawTop()
+            self.drawTop(BLACK)
             fillBox +=1
         if(getBottom):
-            self.drawBottom()
+            self.drawBottom(BLACK)
             fillBox +=1
         if(fillBox == 4):
+            if(self.getOwner == "PlayerOne"):
+                pygame.draw.rect(self.surface, BLUE, (self.getX, self.getY, 100, 100))
+            elif (self.getOwner == "PlayerTwo"):
+                pygame.draw.rect(self.surface, RED, (self.getX, self.getY, 100, 100))
             #Draw box fill color based on owner of Square
         
     
