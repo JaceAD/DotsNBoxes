@@ -52,40 +52,40 @@ class Square:
         self.owner = newOwner
     
     def drawLeft(self, color):
-        startX = self.getX
-        startY = self.getY
-        pygame.draw.Line(self.surface, color, (startX, startY), (startX, startY + 100), 10)
+        startX = self.getX()
+        startY = self.getY()
+        pygame.draw.line(self.surface, color, (startX, startY), (startX, startY + 100), 10)
       
     def drawRight(self, color):
-        startX = self.getX + 100
-        startY = self.getY
-        pygame.draw.Line(self.surface, color, (startX, startY), (startX, startY + 100), 10)
+        startX = self.getX() + 100
+        startY = self.getY()
+        pygame.draw.line(self.surface, color, (startX, startY), (startX, startY + 100), 10)
         #implement here
           
     def drawTop(self, color):
-        startX = self.getX
-        startY = self.getY
-        pygame.draw.Line(self.surface, color, (startX, startY), (startX + 100, startY), 10)
+        startX = self.getX()
+        startY = self.getY()
+        pygame.draw.line(self.surface, color, (startX, startY), (startX + 100, startY), 10)
         #implement here
       
     def drawBottom(self, color):
-        startX = self.getX
-        startY = self.getY + 100
-        pygame.draw.Line(self.surface, color, (startX, startY), (startX + 100, startY), 10)
+        startX = self.getX()
+        startY = self.getY() + 100
+        pygame.draw.line(self.surface, color, (startX, startY), (startX + 100, startY), 10)
         #implement here
         
     def draw(self):
         fillBox = 0
-        if(getLeft):
+        if(self.getLeft()):
             self.drawLeft(BLACK)
             fillBox +=1
-        if(getRight):
+        if(self.getRight()):
             self.drawRight(BLACK)
             fillBox +=1
-        if(getTop):
+        if(self.getTop()):
             self.drawTop(BLACK)
             fillBox +=1
-        if(getBottom):
+        if(self.getBottom()):
             self.drawBottom(BLACK)
             fillBox +=1
         if(fillBox == 4):

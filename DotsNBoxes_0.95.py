@@ -45,7 +45,7 @@ numberSquaresComplete = 0
 playerOnePoints = 0
 playerTwoPoints = 0
 isPlayerOne = False #Will swap to true at start of first turn
-contTurn = True
+continueTurn = False
 board = []
 
 dotRadius  = 10
@@ -60,9 +60,9 @@ height = 800
 screen = pygame.display.set_mode([width,height])
 
 #Populates a 6 by 6 "board" 2D array with instances of Square
-for i in range(0,6):
+for i in range(0,5):
     tmpRow = []
-    for j in range(0,6):
+    for j in range(0,5):
         tmpX = boardOffsetX + j*boxWidth
         tmpY = boardOffsetY + i*boxHeight
         tmpRow.append(Square(tmpX, tmpY, screen))
@@ -70,22 +70,22 @@ for i in range(0,6):
 
 def generateHorizontalXRanges():
     tmpList = []
-    for i in range(0,6):
+    for i in range(0,5):
         tmpList.append([boardOffsetX + boxWidth*i + dotRadius, boardOffsetX + boxWidth*(i+1) - dotRadius])
     return tmpList
 def generateHorizontalYRanges():
     tmpList = []
-    for i in range(0,7):
+    for i in range(0,6):
         tmpList.append([i*boxHeight + boardOffsetY-dotRadius, i*boxHeight + boardOffsetY+dotRadius])
     return tmpList
 def generateVerticalXRanges():
     tmpList = []
-    for i in range(0,7):
+    for i in range(0,6):
         tmpList.append([i*boxWidth + boardOffsetX - dotRadius, i*boxWidth + boardOffsetX + dotRadius])
     return tmpList
 def generateVerticalYRanges():
     tmpList = []
-    for i in range(0,6):
+    for i in range(0,5):
         tmpList.append([boardOffsetY + dotRadius + i*boxHeight, boardOffsetY - dotRadius + (i+1) * boxWidth])
     return tmpList
 
@@ -95,80 +95,63 @@ horizontalYRanges = generateHorizontalYRanges()
 verticalXRanges = generateVerticalXRanges()
 verticalYRanges = generateVerticalYRanges()
 
-#Keeps player in control if they get another turn. Otherwise swaps to other player
-def continueTurn(cont):
-    if(not cont):
-        #Swap if the player doesn't have another turn.
-        global isPlayerOne
-        isPlayerOne = not isPlayerOne  
+########## Validation Functions ##########    
 
 #Checks to see if cursor is over a side of a box
 #Returns a list [rowIndex, columnIndex, sideChar] if it is, otherwise returns [-1,-1,n]
 #User is responsible for handling error
 def checkForSides(xCoord, yCoord):
-    for i in range(0,6):
+    for i in range(0,5):
         if(xCoord >= horizontalXRanges[i][0] and xCoord <= horizontalXRanges[i][1]):
-            for j in range(0,7):
+            for j in range(0,6):
                 if(yCoord >= horizontalYRanges[j][0] and yCoord <= horizontalYRanges[j][1]):
                     if(j == 6):
                         return [j-1,i,"b"]
                     else:
                         return [j,i,"t"]
-    for i in range(0,6):
+    for i in range(0,5):
         if(yCoord >= verticalYRanges[i][0] and yCoord <= verticalYRanges[i][1]):
-            for j in range(0,7):
+            for j in range(0,6):
                 if(xCoord >= verticalXRanges[j][0] and xCoord <= verticalXRanges[j][1]):
                     if(j == 6):
-                        return [i,j-1,"r"]
+                        return [i,j,"r"]
                     else:
                         return [i,j,"l"]
     return [-1,-1,"n"]
 
 def highlightSide(posTuple):
-    checkVal = checkForSides(posTuple[0], posTuple[1])
+    checkVal = checkForSides
     if(not(checkVal[0] == -1)):
-        try:
-            if(checkVal[2] == "r"):
-                if(not board[checkVal[0]][checkVal[1]].getRight()):
-                    board[checkVal[0]][checkVal[1]].drawRight(BLUE)
-            elif(checkVal[2] == "l"):
-                if(not board[checkVal[0]][checkVal[1]].getLeft()):
-                    board[checkVal[0]][checkVal[1]].drawLeft(BLUE)
-            elif(checkVal[2] == "t"):
-                if(not board[checkVal[0]][checkVal[1]].getTop()):
-                    board[checkVal[0]][checkVal[1]].drawTop(BLUE)
-            elif(checkVal[2] == "b"):
-                if(not board[checkVal[0]][checkVal[1]].getBottom()):
-                    board[checkVal[0]][checkVal[1]].drawBottom(BLUE)
-            else:
-                raise Exception("Invalid mouse position being processed. Row: " + checkVal[0] + 
-                                " column: " + checkVal[1] + " side key: " + checkVal[2])
-        except:
-            print("Error. Row: " + str(checkVal[0]) + " column: " + str(checkVal[1]) + " side key: " + checkVal[2])
+        if(checkVal[2] == "r"):
+            if(not board[checkVal[0]][checkVal[1]].getRight()):
+                board[checkVal[0]][checkVal[1]].drawRight(BLUE)
+        elif(checkVal[2] == "l"):
+            if(not board[checkVal[0]][checkVal[1]].getLeft()):
+                board[checkVal[0]][checkVal[1]].drawLeft(BLUE)
+        elif(checkVal[2] == "t"):
+            if(not board[checkVal[0]][checkVal[1]].getTop()):
+                board[checkVal[0]][checkVal[1]].drawTop(BLUE)
+        elif(checkVal[2] == "b"):
+            if(not board[checkVal[0]][checkVal[1]].getBottom()):
+                board[checkVal[0]][checkVal[1]].drawBottom(BLUE)
+        else:
+            raise Exception("Invalid mouse position being processed. Row: " + checkVal[0] + 
+                            " column: " + checkVal[1] + " side key: " + checkVal[2])
 
 ########## State Update Functions ##########
 #Updates a box after a move has been made
 def updateBox(rowIndex, columnIndex, lineKey):
     #print("Inside update box. Update at index [",rowIndex,",",columnIndex,"] with lineKey:", lineKey)
     global board
-    global contTurn
     box = board[rowIndex][columnIndex]
     if(lineKey == "t"):
-        if(not box.getTop()):
-            box.setTop(True)
-            contTurn = False
+        box.setTop(True)
     elif(lineKey == "b"):
-         if(not box.getBottom()):
-             box.setBottom(True)
-             contTurn = False
+        box.setBottom(True)
     elif(lineKey == "l"):
-         if(not box.getLeft()):
-             box.setLeft(True)
-             contTurn = False
+        box.setLeft(True)
     elif(lineKey == "r"):
-         if(not box.getRight()):
-             box.setRight(True)
-             contTurn = False
+        box.setRight(True)
     if(box.getBottom() and box.getTop() and box.getLeft() and box.getRight()):
         global numberSquaresComplete
         if(isPlayerOne):
@@ -187,31 +170,24 @@ def updateBox(rowIndex, columnIndex, lineKey):
 #Input is the Row Index, Column Index, and char of side for the side a player clicked on
 #Assumes input is valid
 def updateBoard(rowIndex, columnIndex, lineChar):
-    tmpPoints1 = playerOnePoints
-    tmpPoints2 = playerTwoPoints
-    
     updateBox(rowIndex, columnIndex, lineChar)
     #If there's a box sharing a side with this one, update it too
     if(lineChar == "t" and rowIndex > 0):
         updateBox(rowIndex-1, columnIndex, "d")
-    elif(lineChar == "b" and rowIndex < 5):
+    elif(lineChar == "b" and rowIndex < 6):
         updateBox(rowIndex+1, columnIndex, "t")
-    elif(lineChar == "r" and columnIndex < 5):
+    elif(lineChar == "r" and columnIndex < 6):
         updateBox(rowIndex, columnIndex+1, "l")
     elif(lineChar == "l" and columnIndex > 0):
         updateBox(rowIndex, columnIndex-1, "r")
-    if(tmpPoints1 < playerOnePoints or tmpPoints2 < playerTwoPoints):
-        global contTurn
-        contTurn = False
-    continueTurn(contTurn)
-    
 
+#Keeps player in control if they get another turn. Otherwise swaps to other player
+def continueTurn(cont):
+    if(not cont):
+        #Swap if the player doesn't have another turn.
+        global isPlayerOne
+        isPlayerOne = not isPlayerOne
 
-
-def inputMove(positionTuple):
-    checkVal = checkForSides(positionTuple[0], positionTuple[1])
-    if(not(checkVal[0] == -1)):
-        updateBoard(checkVal[0], checkVal[1], checkVal[2])
         
 def drawBlackDots():
     global screen
@@ -240,31 +216,25 @@ def main():
     # -------- Main Program Loop -----------\
     done = False
     while not done:
-        gameMouse = pygame.mouse
-        posTuple = gameMouse.get_pos()
-        
         # --- Main event loop
         events = pygame.event.get()
         for event in events: 
             if event.type == pygame.QUIT: # If user clicked close
                 done = True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                inputMove(posTuple)
-       
+        gameMouse = pygame.mouse
+        posTuple = gameMouse.get_pos()
         textFont = pygame.font.Font(None, 36)
        
         
         # --- Drawing code should go here
         # First, clear the screen
         background_color = WHITE 
-        screen.fill(background_color) 
+        screen.fill(background_color)
         mousePosSurface = textFont.render("x: " + str(posTuple[0]) + " y: " + str(posTuple[1]), 0, BLUE)
         
         drawBlackDots()
         highlightSide(posTuple)
-        for i in range(0,6):
-            for j in range(0,6):
-                board[i][j].draw()
+        #iterate through the board and call draw on every square
         screen.blit(mousePosSurface, (5,5))
         # --- Update the screen with what we've drawn.
         pygame.display.update()
