@@ -44,7 +44,7 @@ continueTurn: a bool that will only activate when a player completes a square an
 numberSquaresComplete = 0
 playerOnePoints = 0
 playerTwoPoints = 0
-isPlayerOne = False #Will swap to true at start of first turn
+isPlayerOne = True #Will swap to true at start of first turn
 contTurn = True
 board = []
 
@@ -100,7 +100,7 @@ def continueTurn(cont):
     if(not cont):
         #Swap if the player doesn't have another turn.
         global isPlayerOne
-        isPlayerOne = not isPlayerOne  
+        isPlayerOne = not isPlayerOne
 
 #Checks to see if cursor is over a side of a box
 #Returns a list [rowIndex, columnIndex, sideChar] if it is, otherwise returns [-1,-1,n]
@@ -149,7 +149,7 @@ def highlightSide(posTuple):
 ########## State Update Functions ##########
 #Updates a box after a move has been made
 def updateBox(rowIndex, columnIndex, lineKey):
-    #print("Inside update box. Update at index [",rowIndex,",",columnIndex,"] with lineKey:", lineKey)
+    print("Inside update box. Update at index [",rowIndex,",",columnIndex,"] with lineKey:", lineKey)
     global board
     global contTurn
     box = board[rowIndex][columnIndex]
@@ -175,39 +175,46 @@ def updateBox(rowIndex, columnIndex, lineKey):
             box.setOwner("PlayerOne")
             global playerOnePoints
             playerOnePoints += 1
+            print("player 1 scored")
             numberSquaresComplete += 1
         else:
             box.setOwner("PlayerTwo")
             global playerTwoPoints 
             playerTwoPoints += 1
+            print("player 2 scored")
             numberSquaresComplete += 1
-    board[rowIndex][columnIndex] = box
-    
+    print(box.getOwner())
 #Determines boxes to update after a move has been made and calls updateBox on them
 #Input is the Row Index, Column Index, and char of side for the side a player clicked on
 #Assumes input is valid
 def updateBoard(rowIndex, columnIndex, lineChar):
+    print("Updating board")
     tmpPoints1 = playerOnePoints
     tmpPoints2 = playerTwoPoints
-    
-    updateBox(rowIndex, columnIndex, lineChar)
-    #If there's a box sharing a side with this one, update it too
-    if(lineChar == "t" and rowIndex > 0):
-        updateBox(rowIndex-1, columnIndex, "d")
-    elif(lineChar == "b" and rowIndex < 5):
-        updateBox(rowIndex+1, columnIndex, "t")
-    elif(lineChar == "r" and columnIndex < 5):
-        updateBox(rowIndex, columnIndex+1, "l")
-    elif(lineChar == "l" and columnIndex > 0):
-        updateBox(rowIndex, columnIndex-1, "r")
+    print("player1:", str(tmpPoints1), "player2:", str(tmpPoints2))
+    if(not board[rowIndex][columnIndex].getSide(lineChar)):
+        updateBox(rowIndex, columnIndex, lineChar)
+        #If there's a box sharing a side with this one, update it too
+        if(lineChar == "t" and rowIndex > 0):
+            print("updating above box")
+            updateBox(rowIndex-1, columnIndex, "b")
+        elif(lineChar == "b" and rowIndex < 5):
+            print("updating below box")
+            updateBox(rowIndex+1, columnIndex, "t")
+        elif(lineChar == "r" and columnIndex < 5):
+            print("updating right box")
+            updateBox(rowIndex, columnIndex+1, "l")
+        elif(lineChar == "l" and columnIndex > 0):
+            print("updating left box")
+            updateBox(rowIndex, columnIndex-1, "r")
+        print("player1:", str(tmpPoints1), "player2:", str(tmpPoints2))
+        print("player1Glob:", str(playerOnePoints), "player2Glob:", str(playerTwoPoints))
     if(tmpPoints1 < playerOnePoints or tmpPoints2 < playerTwoPoints):
         global contTurn
-        contTurn = False
+        contTurn = True
     continueTurn(contTurn)
+    contTurn = True
     
-
-
-
 def inputMove(positionTuple):
     checkVal = checkForSides(positionTuple[0], positionTuple[1])
     if(not(checkVal[0] == -1)):
@@ -231,14 +238,13 @@ def main():
     global width
     global height
     global screen
-    
-   
-    
-    
+    textFont = pygame.font.Font(None, 36)
+    processingInput = False
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
     # -------- Main Program Loop -----------\
     done = False
+    
     while not done:
         gameMouse = pygame.mouse
         posTuple = gameMouse.get_pos()
@@ -249,23 +255,54 @@ def main():
             if event.type == pygame.QUIT: # If user clicked close
                 done = True
             if event.type == pygame.MOUSEBUTTONDOWN:
-                inputMove(posTuple)
-       
-        textFont = pygame.font.Font(None, 36)
-       
-        
-        # --- Drawing code should go here
-        # First, clear the screen
-        background_color = WHITE 
-        screen.fill(background_color) 
-        mousePosSurface = textFont.render("x: " + str(posTuple[0]) + " y: " + str(posTuple[1]), 0, BLUE)
-        
-        drawBlackDots()
-        highlightSide(posTuple)
-        for i in range(0,6):
-            for j in range(0,6):
-                board[i][j].draw()
-        screen.blit(mousePosSurface, (5,5))
+                if(not processingInput):
+                    processingInput = True
+                    inputMove(posTuple)
+                    processingInput = False
+            
+            textFont = pygame.font.Font(None, 36)
+            # --- Drawing code should go here
+            # First, clear the screen
+            background_color = WHITE 
+            screen.fill(background_color)
+            
+            #Graphical rendering to perform while game is still going
+        if(numberSquaresComplete < 36):
+             
+            mousePosSurface = textFont.render("x: " + str(posTuple[0]) + " y: " + str(posTuple[1]), 0, BLUE)
+            playerString = ""
+            if(isPlayerOne):
+                playerString = "Player One"
+            else:
+                playerString = "Player Two"
+            playerString += "'s Turn!"    
+            playerTurnSurface = textFont.render(playerString,0,BLACK)
+            score1Surface = textFont.render("Player 1: " + str(playerOnePoints) + " points", 0, BLACK)
+            score2Surface = textFont.render("Player 2: " + str(playerTwoPoints) + " points", 0, BLACK)
+            drawBlackDots()
+            
+            highlightSide(posTuple)
+            
+            for i in range(0,6):
+                for j in range(0,6):
+                    board[i][j].draw()
+                    
+            screen.blit(mousePosSurface, (5,5))
+            screen.blit(playerTurnSurface, (300, 700))
+            
+        else:
+            winner = ""
+            if(playerOnePoints > playerTwoPoints):
+                winner = "player 1 wins!"
+            elif(playerOnePoints < playerTwoPoints):
+                winner = "player 2 wins!"
+            else:
+                winner = "Tie!"
+            winnerSurface = textFont.render(winner,0,BLACK)
+            screen.blit(winnerSurface, (330,300))
+            
+        screen.blit(score1Surface, (100, 750))
+        screen.blit(score2Surface, (500, 750))
         # --- Update the screen with what we've drawn.
         pygame.display.update()
     

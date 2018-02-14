@@ -39,6 +39,15 @@ class Square:
     def getY(self):
         return self.y
     
+    def getSide(self, sideChar):
+        if(sideChar=="t"):
+            return self.getTop()
+        elif(sideChar=="b"):
+            return self.getBottom()
+        elif(sideChar=="l"):
+            return self.getLeft()
+        elif(sideChar=="r"):
+            return self.getRight()
     
     def setLeft(self, leftBool):
         self.left = leftBool
@@ -75,24 +84,18 @@ class Square:
         #implement here
         
     def draw(self):
-        fillBox = 0
         if(self.getLeft()):
             self.drawLeft(BLACK)
-            fillBox +=1
         if(self.getRight()):
             self.drawRight(BLACK)
-            fillBox +=1
         if(self.getTop()):
             self.drawTop(BLACK)
-            fillBox +=1
         if(self.getBottom()):
             self.drawBottom(BLACK)
-            fillBox +=1
-        if(fillBox == 4):
-            if(self.getOwner == "PlayerOne"):
-                pygame.draw.rect(self.surface, BLUE, (self.getX, self.getY, 100, 100))
-            elif (self.getOwner == "PlayerTwo"):
-                pygame.draw.rect(self.surface, RED, (self.getX, self.getY, 100, 100))
+        if(self.getOwner() == "PlayerOne"):
+            pygame.draw.rect(self.surface, BLUE, (self.getX(), self.getY(), 100, 100))
+        elif (self.getOwner() == "PlayerTwo"):
+            pygame.draw.rect(self.surface, RED, (self.getX(), self.getY(), 100, 100))
             #Draw box fill color based on owner of Square
         
     
